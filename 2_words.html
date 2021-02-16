@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>B4_2v</title>
+</head>
+<body>
+	<script>
+		function changeWord(a,b){
+		var slovar=["ЛУЖА","МУЗА","ЛИРА","МЕХА","ЛИГА","ТАРА","ЛИПА","ТУРА","ПАРК","ЛОЖЬ","ЛУПА","ПЛОТ","МУРА","ПАУК","ПАУТ","ПЛУТ","ЛОЖА","СЛОТ","ПАРА"];
+		var res=nextStep(a,slovar,b);
+		var str=res.join("-");
+        return str;
+
+        //подсчет отличающихся букв
+		function compareWords(s1,s2) {
+			var n=0;//количество отличающихся букв
+			for(var i=0;i<s1.length;i++){
+				if(s1[i]!==s2[i]){
+					n++;
+				}
+			}
+			return n;
+		}
+
+        // использование функции даст избежать результата лиса-<лира-лига-липа>-лупа - 3 раза изменяется буква под одним и тем же индексом:
+		function bestResult(result) {
+			var m=4;//условно
+			for (var i=0, k=1;i<result.length;i++){	
+				var s1=result[i];
+				var s2=result[k];
+				for(var j=0;j<s1.length;j++){
+					if(s1[j]!==s2[j]){
+						if(m!==j){						
+							var m=j;//запоминаю индекс измененной буквы для проверки а не под тем же индексом меняет букву программа в текущем слове, что и в предыдущем
+						} else{
+							result[i]=result[i-1];//заменяю на предыдущее слово для получения одинаковых слов
+						}						
+					}
+				}
+				k++;
+				if(k===result.length){
+					return Array.from(new Set(result));//избавляюсь от одинаковых слов
+				}
+			}			
+		}
+
+
+		function nextStep(a,slovar,b){
+			var masW=[];
+			for(var j=0;j<slovar.length;j++){
+				if(compareWords(a,slovar[j])===1){	
+					masW.push(slovar[j]);
+				}
+			}
+			if(compareWords(a,b)===1){
+				masW.push(b);
+			}
+
+			if(masW.length===0){
+				return null;
+			}else{
+				for(var k=0;k<masW.length;k++){
+					var w=masW[k];	
+					if(w===b){
+						return [a,w];
+					}else{
+						var d=slovar.indexOf(w);
+						slovar.splice(d,1);
+						var result=nextStep(w,slovar,b);
+						if(result===null){
+							continue;							   						
+						} else{
+							result.unshift(a);
+							return bestResult(result);                             
+						}
+
+					}
+				}
+			}
+		}
+        }
+        (function tests(){
+        var r=changeWord("ЛИСА","ЛОСЬ");        
+        console.log("ЛИСА - ЛОСЬ: "+r);
+        console.log((r==="ЛИСА-ЛИПА-ЛУПА-ЛУЖА-ЛОЖА-ЛОЖЬ-ЛОСЬ")?"пройден":"НЕ ПРОЙДЕН");
+        })();
+
+        (function tests(){
+        var r=changeWord("МУХА","СЛОН");        
+        console.log("МУХА - СЛОН: "+r);
+        console.log((r==="МУХА-МУРА-ТУРА-ТАРА-ПАРА-ПАРК-ПАУК-ПАУТ-ПЛУТ-ПЛОТ-СЛОТ-СЛОН")?"пройден":"НЕ ПРОЙДЕН");
+        })();
+		</script>
+	</body>
+	</html>

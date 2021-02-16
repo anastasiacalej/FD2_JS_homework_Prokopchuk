@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>VowelsReduce</title>
+</head>
+<body>
+	<script>
+		"use strict";
+		var stroka=prompt("Введите текст:");
+		var result=countVowel(stroka);
+		alert("Количество гласных букв в строке: "+result);
+		
+		function countVowel(stroka) {
+			var str=stroka.toLowerCase().split("");
+			var vowels={а:true,е:true,ё:true,и:true,о:true,у:true,ы:true,э:true,ю:true,я:true};
+			var count=str.reduce(fff,0);
+
+			function fff(r,v,i,str){
+				return(v in vowels)?++r:r;
+			}
+			return count;
+		}
+	</script>
+</body>
+</html>

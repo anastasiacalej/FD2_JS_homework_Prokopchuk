@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+</head>
+<body>
+	<script>
+		"use strict";
+		var text=prompt("Введите фразу: ");
+		alert((palindrom(text))?"Это палиндром!":"Эта фраза не является палиндромом!");
+		function palindrom(text) {
+			var textNew=text.toLowerCase();
+			var symbolsIgnore={" ":true,"-":true,".":true,",":true,"_":true,"/":true,"?":true,"!":true,":":true,";":true,"ь":true,"ъ":true};
+			var letter;
+			var j=0;
+			var goodText="";
+			for(var i=0;i<textNew.length;i++){
+				letter=textNew[i];
+				if(letter==="ё"){
+					goodText+="е";
+				} else if(letter in symbolsIgnore){
+					continue;
+				} else{
+					goodText+=letter;
+				}
+			}
+			
+			for(var k=goodText.length-1;k>j;k--){
+				if(goodText[k]!==goodText[j]){
+					return false;
+				}
+				j++;
+			}
+			return true;
+		}
+	</script>
+</body>
+

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	<script>
+		"use strict"
+		var text=prompt("Введите текст произвольной длины:");
+		var total=indentDelete(text);
+		console.log("@"+total+"@");
+
+		function indentDelete(text){
+			var result;// строка- конечный результат
+			
+            var i=0;//cчитаю пробелы в начале строки
+            while(text.charAt(i)===" "){
+            	i++;
+            }
+            //если после первого цикла вся строка - это одни пробелы
+            if(i-1===text.length-1){
+            	result="";//возвращаю пустую строку без пробелов
+            	return result;	
+            }
+
+            var j=0;//считаю пробелы в конце строки
+            while(text.charAt(text.length-1-j)===" "){
+            	j++;
+            }
+
+            //если нет начальных и конечных пробелов:
+            if (i===0&&j===0) {
+            	return text;//возвращаю исходную строку
+            }else{
+            //получаю новую строку result без пробелов в начале и в конце строки:
+            result=text.substring(i,text.length-j);
+            return result;
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>DYN_FORM</title>
+</head>
+<body>
+
+	<script>
+		"use strict";
+		var formDef1=
+		[
+		{label:'Название сайта:',kind:'longtext',name:'sitename'},
+		{label:'URL сайта:',kind:'longtext',name:'siteurl'},
+		{label:'Посетителей в сутки:',kind:'number',name:'visitors'},
+		{label:'E-mail для связи:',kind:'shorttext',name:'email'},
+		{label:'Рубрика каталога:',kind:'combo',name:'division',
+		variants:[{text:'здоровье',value:1},{text:'домашний уют',value:2},{text:'бытовая техника',value:3}]},
+		{label:'Размещение:',kind:'radio',name:'payment',
+		variants:[{text:'бесплатное',value:1},{text:'платное',value:2},{text:'VIP',value:3}]},
+		{label:'Разрешить отзывы:',kind:'check',name:'votes'},
+		{label:'Описание сайта:',kind:'memo',name:'description'},
+		{label:'Опубликовать:',kind:'submit'},
+		];
+
+		var formDef2=
+		[
+		{label:'Фамилия:',kind:'longtext',name:'lastname'},
+		{label:'Имя:',kind:'longtext',name:'firstname'},
+		{label:'Отчество:',kind:'longtext',name:'secondname'},
+		{label:'Возраст:',kind:'number',name:'age'},
+		{label:'Зарегистрироваться:',kind:'submit'},
+		];
+
+
+		function dynForm(tag,massiv) {
+			var size={longtext:50,shorttext:25,number:10};
+
+			var nBody=document.body;
+			var newForm=document.createElement(tag);
+			var newTable=document.createElement('table');
+			nBody.appendChild(newForm);
+			newForm.appendChild(newTable);
+			newForm.setAttribute('action','https://fe.it-academy.by/TestForm.php');
+
+			for (var i=0;i<massiv.length;i++){
+				var newTr=document.createElement('tr');
+				newTable.appendChild(newTr);
+
+				var massivKeys=Object.keys(massiv[i]);
+
+				for(var j=0;j<massivKeys.length;j++){
+
+					if((massivKeys[j]==='label')&&(massiv[i]['kind']!=='memo')&&(massiv[i]['kind']!=='submit')){
+						var newTd1=document.createElement('td');
+						var newTextTd1=document.createTextNode(massiv[i]['label']);
+						newTr.appendChild(newTd1);
+						newTd1.appendChild(newTextTd1);
+					} 
+
+					else if(massivKeys[j]==='kind'){
+						if(massiv[i]['kind']==='longtext'||massiv[i]['kind']==='shorttext'||massiv[i]['kind']==='number'){
+							var atrSize=size[massiv[i]['kind']];
+							var newTd2=document.createElement('td');
+							var newInput=document.createElement('input');
+							newTr.appendChild(newTd2);
+							newTd2.appendChild(newInput);
+							newInput.setAttribute('type','text');
+							newInput.setAttribute('size',atrSize);
+						} 
+						else if(massiv[i]['kind']==='combo'){
+							var newTd2=document.createElement('td');
+							var newSelect=document.createElement('select');
+							newTr.appendChild(newTd2);
+							newTd2.appendChild(newSelect);
+							for(var k=0;k<(massiv[i]['variants']).length;k++){
+								var newOption=document.createElement('option');
+								var newTextOption=document.createTextNode(massiv[i]['variants'][k]['text']);
+								newSelect.appendChild(newOption);
+								newOption.appendChild(newTextOption);
+								newOption.setAttribute('value',massiv[i]['variants'][k]['value']);
+							}
+						}
+						else if(massiv[i]['kind']==='radio'){
+							var newTd2=document.createElement('td');
+							newTr.appendChild(newTd2);
+							for(var m=0;m<(massiv[i]['variants']).length;m++){
+								var newInput=document.createElement('input');
+								var newSpan=document.createElement('span');
+								var newTextSpan=document.createTextNode(massiv[i]['variants'][m]['text']);
+								newTd2.appendChild(newInput);
+								newTd2.appendChild(newSpan);
+								newSpan.appendChild(newTextSpan);
+								newInput.setAttribute('type','radio');
+								newInput.setAttribute('value',massiv[i]['variants'][m]['value']);
+								newInput.setAttribute('name',massiv[i]['name']);
+							}
+						}
+
+						else if(massiv[i]['kind']==='check'){
+							var newTd2=document.createElement('td');
+							var newInput=document.createElement('input');
+							newTr.appendChild(newTd2);
+							newTd2.appendChild(newInput);
+							newInput.setAttribute('type','checkbox');
+						} 
+
+						else if(massiv[i]['kind']==='memo'){
+							var newTd2=document.createElement('td');
+							var newTextTd=document.createTextNode(massiv[i]['label']);
+							var newBr=document.createElement('br');
+							var newTextarea=document.createElement('textarea');
+							newTr.appendChild(newTd2);
+							newTd2.appendChild(newTextTd);
+							newTd2.appendChild(newBr);
+							newTd2.appendChild(newTextarea);
+							newTd2.setAttribute('colspan','2');
+							newTextarea.setAttribute('cols','74');
+						}
+
+						else if(massiv[i]['kind']==='submit'){
+							var newTd2=document.createElement('td');
+							var newInput=document.createElement('input');
+							newTr.appendChild(newTd2);
+							newTd2.appendChild(newInput);
+							newInput.setAttribute('type','submit');
+							var str=massiv[i]['label'];
+							var newStr=str.slice(0,str.length-1);
+							newInput.setAttribute('value',newStr);
+						} 
+
+					} else if(massivKeys[j]==='name'){
+						if(massiv[i]['kind']==='combo'){
+							newSelect.setAttribute('name',massiv[i]['name']);
+						}
+						else if(massiv[i]['kind']==='memo'){
+							newTextarea.setAttribute('name',massiv[i]['name']);	
+						} 
+						else{
+							newInput.setAttribute('name',massiv[i]['name']);
+						}
+					}
+
+				}
+
+			}
+
+		}
+
+		dynForm('form',formDef1);
+		dynForm('form',formDef2);
+	</script>
+</body>
+</html>

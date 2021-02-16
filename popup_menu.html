@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>POPUP_MENU</title>
+</head>
+<body>
+	<script>
+		 "use strict";
+            
+           function buildMenu(menu){
+            var tNav=document.createElement('nav');
+            document.body.appendChild(tNav);                        
+            buildHorizontalMenu(tNav,menu);
+
+            function buildHorizontalMenu(parent,menu){
+                var tUl=document.createElement('ul');
+                parent.appendChild(tUl);                
+            	for(var i=0;i<menu.length;i++){
+            	    var tLi=document.createElement('li');
+            	    tUl.appendChild(tLi);
+            	    
+            	    var tA=document.createElement('a');
+            	    tLi.appendChild(tA);
+            	    tA.innerHTML=menu[i]['name'];
+            	    if(parent===tNav){            	    	
+            	    	tUl.className='topmenu';
+            	    	tLi.className='topli';
+
+            	    }else{
+            	    	tUl.className='submenu';
+            	    	tLi.className='subli';
+            	    }
+            	    if('submenu' in menu[i]){
+            	    	var mnemon=document.createElement('span');
+            	    	tA.appendChild(mnemon);
+            	    	if(parent===tNav){            	    	
+            	    	mnemon.innerHTML='&dArr;';
+
+            	    }else{
+            	    	mnemon.innerHTML='&rArr;';
+            	    }
+            	    	
+            	    	 buildHorizontalMenu(tLi,menu[i]['submenu']);
+            	    }else{
+            	    	tA.setAttribute('href',menu[i]['url']);
+            	    }
+                }
+            }
+            
+            tNav.style.cssText='list-style:none';
+            var topmenu=document.getElementsByClassName('topmenu');//ul класса topmenu
+            var submenu=document.getElementsByClassName('submenu');//ul класса submenu
+            var topLi=document.getElementsByClassName('topli');//li класса topli
+            var subLi=document.getElementsByClassName('subli');//li класса subli
+            var elemA=document.getElementsByTagName('a');//все элементы а
+            var elemMnemos=document.getElementsByTagName('span');//все элементы а
+
+            //стилизация ul класса topmenu                    
+            topmenu[0].style.cssText='padding-inline-start: 0px;position: relative;';
+           
+
+            //стилизация всех ul класса submenu         
+            for(let i=0;i<submenu.length;i++){            	
+            	submenu[i].style.cssText='display:none;padding-inline-start: 0px;background: #d3fabb;position: absolute;visibility: hidden;opacity: 0;z-index:100;border-bottom:1px solid #003559';
+            	for(let j=0;j<topLi.length;j++){
+                   if(submenu[i].parentNode===topLi[j]){
+                       submenu[i].style.left='3%';
+                       submenu[i].style.top='90%';
+                       break;
+                   }else{
+                   	   submenu[i].style.left='97%';
+                   	   submenu[i].style.top='20%';
+                   }                
+                }
+            }
+            
+            //стилизация элементов li класса topmenu
+            for(let i=0;i<topLi.length;i++){
+            	topLi[i].style.cssText=' display: inline-block;position: relative;border: 1px solid #003559;border-right:none;background: #d3fabb;';
+            	if(i===topLi.length-1){
+            		topLi[i].style.borderRight='1px solid #003559';
+            	}
+            	topLi[i].addEventListener('mouseover',over);
+            	topLi[i].addEventListener('mouseout',out);
+            }
+
+            //стилизация элементов li класса submenu
+            for(let i=0;i<subLi.length;i++){
+            	subLi[i].style.cssText=' display: block;position: relative;border: 1px solid #003559;border-bottom:none;';           	
+            	subLi[i].addEventListener('mouseover',over);
+            	subLi[i].addEventListener('mouseout',out);
+            }
+
+            //стилизация всех элементов a            
+            for(let i=0;i<elemA.length;i++){
+            	elemA[i].style.cssText='height: 40px;line-height: 40px;padding: 0 10px;font-family:sans-serif;font-weight: bold;color: #003559;display: block; text-decoration: none;outline: none;width:max-content;';
+            }
+            
+            //стилизация всех мнемоников                    
+             for(let i=0;i<elemMnemos.length;i++){
+            	elemMnemos[i].style.cssText='position: absolute;right:10px;';
+            	elemMnemos[i].parentNode.style.paddingRight='30px';
+            }
+
+            //Обработчик наведения мыши на элемент li
+            function over(EO){
+            	EO=EO||window.event;
+            	var elemLi=EO.currentTarget;           	
+            	var subElem=elemLi.getElementsByClassName('submenu');
+            	var elemA=elemLi.getElementsByTagName('a');
+            	if(elemA[0].getAttribute('href')){
+                 elemA[0].style.textDecoration= 'underline';
+            	} 
+            	if(subElem[0]) { 
+            	subElem[0].style.display='block';         	
+            	subElem[0].style.visibility='visible';
+            	subElem[0].style.opacity='1';
+                }
+            }
+
+            //Обработчик ухода мыши с элемента li
+            function out(EO){
+            	EO=EO||window.event;
+            	var elemLi=EO.currentTarget;            	
+            	var subElem=elemLi.getElementsByClassName('submenu');
+            	var elemA=elemLi.getElementsByTagName('a');
+            	if(elemA[0].getAttribute('href')){
+                   elemA[0].style.textDecoration= 'none';
+            	}
+            	if (subElem[0]) {            	
+            	subElem[0].style.visibility='hidden';
+            	subElem[0].style.opacity='0';
+                }
+            }
+                        
+            }
+            
+    var menu=[
+                {name:'Пункт 1',submenu:
+                                    [
+                                     {name:'Пункт 1.1',submenu:
+                                                              [
+                                                              {name:'Пункт 1.1.1',url:'https://www.youtube.com'},
+                                                              {name:'Пункт 1.1.2 длинный',url:'https://www.youtube.com'}
+                                                              ]
+                                     },
+                                     {name:'Пункт 1.2',url:'https://www.youtube.com'},
+                                     {name:'Пункт 1.3 длинный',submenu:
+                                                                      [
+                                                                      {name:'Пункт 1.3.1',url:'https://www.youtube.com'},
+                                                                      {name:'Пункт 1.3.2',url:'https://www.youtube.com'},
+                                                                      {name:'Пункт 1.3.3',url:'https://www.youtube.com'},
+                                                                      {name:'Пункт 1.3.4 длинный',url:'https://www.youtube.com'}
+                                                                      ]
+                                     }
+                                    ]
+               },
+               {name:'Пункт 2 длинный',url:'https://www.youtube.com'},
+               {name:'Пункт 3',submenu:
+                                      [
+                                      {name:'Пункт 3.1 длинный',url:'https://www.youtube.com'},
+                                      {name:'Пункт 3.2',url:'https://www.youtube.com'}
+                                      ]
+               }
+           ];
+    
+    buildMenu(menu);
+	</script>
+</body>
+</html>
+
+

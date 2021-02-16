@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>C3</title>
+</head>
+<body>
+    <input type=button value='тесты' onclick='tests()'>
+	<script>
+		"use strict";
+
+		function tests(){
+		var H1={ a:5, b: { b1:6, b2:7 } };
+		var H2={ b: { b1:6, b2:7 }, a:5 };
+		var H3={ a:5, b: { b1:6 } };
+		var H4={ a:5, b: { b1:66, b2:7 } };
+		var H5={ a:5, b: { b1:6, b2:7, b3:8 } };
+		var H6={ a:null, b:undefined, c:Number.NaN };
+		var H7={ c:Number.NaN, b:undefined, a:null };
+		var H8={a:5,b:6};
+		var H9={c:5,d:6};
+		var H10={a:5};
+		var A1=[5,7];
+		var A2=[5,5,7];
+		var A3=[5,8,7];
+
+		console.log( "H1={ a:5, b: { b1:6, b2:7 } }");
+		console.log( "H2={ b: { b1:6, b2:7 }, a:5 }");
+		console.log( "H3={ a:5, b: { b1:6 } }");
+		console.log( "H4={ a:5, b: { b1:66, b2:7 } }");
+		console.log( "H5={ a:5, b: { b1:6, b2:7, b3:8 } }");
+		console.log( "H6={ a:null, b:undefined, c:Number.NaN }");
+		console.log( "H7={ c:Number.NaN, b:undefined, a:null }");
+		console.log( "H8={a:5,b:6}");
+		console.log( "H9={c:5,d:6}");
+		console.log( "H10={a:5}");
+		console.log( "A1=[5,7]");
+		console.log( "A2=[5,5,7]");
+		console.log( "A3=[5,8,7]");
+		console.log("(H1,H2) - "+(deepComp(H1,H2)?"пройден":"НЕ ПРОЙДЕН!!!")); //будет true
+		console.log("(H1,H3) - "+(!deepComp(H1,H3)?"пройден":"НЕ ПРОЙДЕН!!!")); //будет false
+		console.log("(H1,H4) - "+(!deepComp(H1,H4)?"пройден":"НЕ ПРОЙДЕН!!!")); //будет false
+		console.log("(H1,H5) - "+(!deepComp(H1,H5)?"пройден":"НЕ ПРОЙДЕН!!!")); //будет false
+		console.log("(H6,H7) - "+(deepComp(H6,H7)?"пройден":"НЕ ПРОЙДЕН!!!")); //будет true
+		console.log("(H8,H9) - "+(!deepComp(H8,H9)?"пройден":"НЕ ПРОЙДЕН!!!")); //будет false
+		console.log("(H8,H10) - "+(!deepComp(H8,H10)?"пройден":"НЕ ПРОЙДЕН!!!")); //будет false
+		console.log("(null,H10) - "+(!deepComp(null,H10)?"пройден":"НЕ ПРОЙДЕН!!!")); //будет false
+		console.log("(H10,null) - "+(!deepComp(H10,null)?"пройден":"НЕ ПРОЙДЕН!!!")); //будет false
+		console.log("(null,null) - "+(deepComp(null,null)?"пройден":"НЕ ПРОЙДЕН!!!")); //будет true
+		console.log("(null,undefined) - "+(!deepComp(null,undefined)?"пройден":"НЕ ПРОЙДЕН!!!")); //будет false
+		console.log("(5,'5') - "+(!deepComp(5,"5")?"пройден":"НЕ ПРОЙДЕН!!!")); //будет false
+		console.log("(5,H1) - "+(!deepComp(5,H1)?"пройден":"НЕ ПРОЙДЕН!!!")); //будет false
+		console.log("(A1,H1) - "+(!deepComp(A1,H1)?"пройден":"НЕ ПРОЙДЕН!!!")); //будет false
+		console.log("(A2,A3) - "+(!deepComp(A2,A3)?"пройден":"НЕ ПРОЙДЕН!!!")); //будет false
+		console.log("(deepComp( {a:5,b:undefined}, {a:5,c:undefined}) - "+(!deepComp( {a:5,b:undefined}, {a:5,c:undefined} )?"пройден":"НЕ ПРОЙДЕН!!!"));// будет false
+		console.log("([5,7],{0:5,1:7}) - "+(!deepComp([5,7],{0:5,1:7})?"пройден":"НЕ ПРОЙДЕН!!!")); //будет false
+        console.log("({a:Number.NaN,b:5},{a:Number.NaN,b:6}) - "+(!deepComp({a:Number.NaN,b:5},{a:Number.NaN,b:6})?"пройден":"НЕ ПРОЙДЕН!!!")); //будет false
+        console.log("({a:Number.NaN,b:6},{a:Number.NaN,b:6}) - "+(deepComp({a:Number.NaN,b:6},{a:Number.NaN,b:6})?"пройден":"НЕ ПРОЙДЕН!!!")); //будет false
+        }
+
+		function deepComp(a,b) {
+			//если не равны типы - сразу вернем результат
+			if(typeof(a)!==typeof(b)){
+				return false;
+			} 
+            //если типы равны, рассматриваем 3 варианта
+            // 1 вариант (число, строка, булевское значение, null, underfined, Number.NaN)
+			else if(typeof(a)!=="object"||(a===null||b===null)||(a===undefined||b===undefined)){
+				if(isNaN(a)&&isNaN(b)){
+					return true;
+				}
+				return (a===b);
+			}
+            //2 вариант - массивы (предполагаем одно из значений - массив, второе - объект) - сразу возвращаем результат
+			 else if(Array.isArray(a)!==Array.isArray(b)){
+				return false;
+			} 
+            // массивы
+			else if(Array.isArray(a)){
+				if(a.length!==b.length){ //сравниваем длину - если разная - сразу вернем результат
+					return false;
+				}else{
+					for(var i=0;i<a.length;i++){
+								if(!deepComp(a[i],b[i])){
+									return false;
+								}
+					}
+					return true;// если равны все элементы - возвращаем true
+				}
+			} 
+            //3 вариант - объекты или хэши (логика как с массивами)
+			else{
+				if(((Object.keys(a)).length)!==((Object.keys(b)).length)){
+					return false;
+				} else{
+					for(var key in a){
+						if(key in b){
+								if(!deepComp(a[key],b[key])){
+								return false;
+								}
+							}
+						 else
+						return false;
+					}
+					return true;
+				}
+			}
+		}
+		</script>
+</body>
+</html>

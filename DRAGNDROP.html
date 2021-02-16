@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>DRAGNDROP</title>
+</head>
+<body>
+	<div id="images" style="margin: 0 auto; width: 1400px">
+	<img width="300px" height="220px" src="https://bipbap.ru/wp-content/uploads/2017/10/0_8eb56_842bba74_XL-640x400.jpg" alt="">
+	<img width="500px" height="350px" src="https://bipbap.ru/wp-content/uploads/2017/10/0_a9e8c_fefaa1d2_XL-640x400.jpg" alt="">
+	<img width="400px" height="270px" src="https://bipbap.ru/wp-content/uploads/2017/10/fon-3.jpg" alt="">
+	<img width="350px" height="230px" src="https://bipbap.ru/wp-content/uploads/2017/10/0_a9e8f_beecb6d9_XL-640x400.jpg" alt="">
+	<img width="450px" height="350px" src="https://bipbap.ru/wp-content/uploads/2017/10/10-640x400.jpg" alt="">
+	<img width="370px" height="250px" src="https://bipbap.ru/wp-content/uploads/2017/10/domiki_reka_les_kusty_zelen_derevya_1920x1080-640x360.jpg" alt="">
+	</div>
+
+	<script>
+		"use strict";
+		window.onload=init;
+
+		function init(){
+		var el=document.getElementById('images');		
+		var masImgs=el.children;
+
+		for(var i=0;i<masImgs.length;i++){          
+            var top=masImgs[i].offsetTop;
+            var left=masImgs[i].offsetLeft;
+            masImgs[i].style.top=top+'px';
+            masImgs[i].style.left=left+'px';
+		    }
+		for(var i=0;i<masImgs.length;i++){          
+            masImgs[i].style.position='absolute';
+             //отменяю ondragstart
+		    masImgs[i].ondragstart = function() {
+            return false;
+            };
+ 
+            //назначаю функцию-обработчик при нажатии на картинку мышью
+            masImgs[i].onmousedown=function (EO){
+            	EO=EO||window.event;	
+            	var w=EO.target;
+			    //запоминаю координаты курсора на картинке при нажатии по ней мышью
+			    var shiftX = EO.clientX - w.getBoundingClientRect().left;
+			    var shiftY = EO.clientY - w.getBoundingClientRect().top;
+
+			    document.body.appendChild(w);
+			    moveF(EO.pageX, EO.pageY);
+			    //назначаю обработчик для перемещения курсора по всему экрану
+			    document.addEventListener('mousemove', mouseMove);
+                
+                function mouseMove(EO) {
+				    EO=EO||window.event;
+				    moveF(EO.pageX, EO.pageY);
+			    }
+
+			    function moveF(pageX, pageY) {
+				    w.style.left = pageX - shiftX + 'px';
+				    w.style.top = pageY - shiftY + 'px';
+			    }
+
+                //назначаю обработчик при отпускании кнопки мыши
+			    w.onmouseup = function() {
+				   document.removeEventListener('mousemove', mouseMove);//отменяю обработчик перемещения
+				   w.onmouseup = null;
+			    };
+		    };   
+		    }              
+	    }		       		
+	</script>
+        	
+</body>
+</html>

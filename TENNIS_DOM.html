@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>TENNIS_DOM</title>
+</head>
+<body>
+	<script>
+		"use strict";
+    //константы
+    const wField=600;//длина игрового поля
+    const hField=400;//ширина игрового поля
+    const wFieldLeft=300;//отступ слева для игрового поля
+    const hFieldTop=150;//отступ сверху для игрового поля
+    const wButtonLeft=0;//отступ слева  для кнопки <старт> от игрового поля
+    const hButtonTop=-40;//отступ сверху  для кнопки <старт> от игрового поля
+    const wCountLeft=wField/2-50;//отступ слева  для счета от игрового поля
+    const hCountTop=-60;//отступ сверху  для счета от игрового поля    
+    const leftRasketW=20;//ширина левой ракетки
+    const leftRasketH=120;//длина левой ракетки    
+    const rightRasketW=20;//ширина правой ракетки
+    const rightRasketH=120;//длина правой ракетки  
+    const ballRadius=15;//радиус мячика
+    const ballCenterSX=wField/2;//стартовая позиция центра мяча относительно поля слева
+    const ballCenterSY=hField/2;//стартовая позиция центра мяча относительно поля сверху
+    var speedBallX=3;//скорость мячика по оси X /скорость по оси Y зависит от угла стартового вылета
+    var speedBallY=0;//скорость мячика по оси Y в зависимости от X - первоначальная
+    const speedRasket=2;//скорость любой из ракеток
+
+    //расчет первоначального угла вылета:
+    const rad=Math.atan2(hField,wField);//угол в радианах для стартового вылета
+    const grad=rad*180/Math.PI;//угол в градусах для стартового вылета
+    const gradValidFrom=-grad;
+    const gradValidTo=grad;
+
+    //переменная <состояние игры>:
+    var statusGame=0;//0-состояние ожидания 1- мяч летает 2 - коснулся стенки
+    var start=false;
+    var events = {};//для запоминания какие кнопки нажаты на клавиатуре
+    
+     //для кроссбраузерности анимации:
+    var RAF=
+        // находим, какой requestAnimationFrame доступен
+        window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        // ни один не доступен
+        // будем работать просто по таймеру
+        function(callback)
+            { window.setTimeout(callback, 1000 / 60); }
+        ;
+
+  //построение методом DOM    
+    //контейнер общий на все		
+    var container=document.createElement('div');
+    document.body.appendChild(container);
+    container.style.position='relative';
+
+    //игровое поле    
+	var field=document.createElement('div');	
+	container.appendChild(field);		
+	field.style.position='absolute';
+	field.style.left=wFieldLeft+'px';///
+	field.style.top=hFieldTop+'px';///
+	field.style.border = '1px solid black';
+	field.style.width=wField+'px';
+    field.style.height=hField+'px';
+    field.style.backgroundColor = '#F0E68C';
+
+    //кнопка "старт"
+    var buttonStart=document.createElement('button');	
+	field.appendChild(buttonStart);
+	buttonStart.innerHTML='старт!';
+    buttonStart.style.position='absolute';
+    buttonStart.style.left=wButtonLeft+'px';///
+	buttonStart.style.top=hButtonTop+'px';///	
+	buttonStart.style.padding = '2px 30px';///
+	buttonStart.style.backgroundColor = '#C0C0C0';
+    buttonStart.style.outline='none';
+    buttonStart.style.border= 'none';
+    buttonStart.style.fontSize = 'x-large';
+    buttonStart.style.cursor = 'pointer';
+    	
+    //счет
+    var leftCount=0;
+    var rightCount=0;
+    var pCount=document.createElement('p');	
+	field.appendChild(pCount);
+	pCount.innerHTML=leftCount+' : '+rightCount;
+    pCount.style.position='absolute';
+    pCount.style.left=wCountLeft+'px';///
+	pCount.style.top=hCountTop+'px';///
+    pCount.style.margin='0px 0px';	
+    pCount.style.fontSize = 'xxx-large';	
+    pCount.style.fontWeight = 'bold';	
+
+    //объект <левая ракетка>:
+    var leftRasketMy={
+        posX : 0,
+        posY : 0,
+        speedX : 0,
+        width : leftRasketW,
+        height : leftRasketH,
+
+        create : function() {
+        	var leftRasket=document.createElement('div');	
+	        field.appendChild(leftRasket);
+            leftRasket.style.position='absolute';
+            leftRasket.className='myleftRasket';
+            leftRasket.style.left='0px';///
+	        leftRasket.style.top='0px';///
+	        leftRasket.style.width=leftRasketW+'px';
+            leftRasket.style.height=leftRasketH+'px';	
+            leftRasket.style.backgroundColor = '#2E8B57';
+        },
+
+        update : function() {
+        	var leftRasket=document.getElementsByClassName('myleftRasket');
+            leftRasket[0].style.transform="translateY("+this.posY+"px) translateZ(0)";
+        }
+    }
+
+    //объект <правая ракетка>:
+    var rightRasketMy={
+        posX : wField-rightRasketW,
+        posY : hField-rightRasketH,
+        posYY : 0,
+        speedY : 0,
+        width : rightRasketW,
+        height : rightRasketH,
+
+        create : function() {
+        	var rightRasket=document.createElement('div');	
+	        field.appendChild(rightRasket);
+            rightRasket.style.position='absolute';
+            rightRasket.className='myrightRasket';
+            rightRasket.style.right='0px';///
+	        rightRasket.style.bottom='0px';///
+	        rightRasket.style.width=rightRasketW+'px';
+            rightRasket.style.height=rightRasketH+'px';	
+            rightRasket.style.backgroundColor = '#0000FF';
+        },
+
+        update : function() {
+        	var rightRasket=document.getElementsByClassName('myrightRasket');
+            rightRasket[0].style.transform="translateY("+this.posYY+"px) translateZ(0)";
+        }
+    }
+
+    //объект <мячик>:
+    var ballMy={
+        posX : ballCenterSX,//позиция мяча относительно центра мяча
+        posY : ballCenterSY,//позиция мяча относительно центра мяча
+        posXX:ballCenterSX-ballRadius,//позиция мяча относительно верхнего левого угла diva мячика
+        posYY:ballCenterSY-ballRadius,//позиция мяча относительно верхнего левого угла diva мячика
+        speedX : 0,
+        speedY : speedBallY,
+        radius : ballRadius,
+        
+        create : function() {
+        	var ball=document.createElement('div');	
+	        field.appendChild(ball);
+	        ball.className='myBall';
+            ball.style.position='absolute';
+	        ball.style.width=ballRadius*2+'px';
+            ball.style.height=ballRadius*2+'px';	
+            ball.style.backgroundColor = 'red';
+            ball.style.borderRadius = '50%';
+        },
+
+        update : function() {
+        	var ballElem=document.getElementsByClassName('myBall');
+            ballElem[0].style.transform="translateX("+this.posXX+"px) translateY("+this.posYY+"px) translateZ(0)";
+        }
+    }
+
+    //вспомогательная функция для случайного угла:
+    function randomDiap(n,m) {
+                 return Math.floor(
+                 Math.random()*(m-n+1))+n;
+            }
+
+    //функция для расчета случайного угла:
+    function angel(){
+            var gradValid =randomDiap(gradValidFrom,gradValidTo);//случайный угол вылета
+            var direction =Math.round(Math.random());//случайное направление вылета 0- вправо, 1- влево 
+            if(direction===0){                      
+                ballMy.speedX=speedBallX;
+            }else if(direction===1){                       
+                ballMy.speedX=-speedBallX;
+            }        
+            var radValid=gradValid/180*Math.PI;//текущий угол вылета из центра в радианах
+            ballMy.speedY=ballMy.speedX*Math.tan(radValid);//cкорость по оси Y
+            } 
+
+    //для отрисовки анимации
+    function move() {
+        //АНИМАЦИЯ МЯЧИКА
+        if(start&&statusGame===0){
+            statusGame=1; 
+            angel();     
+            ballMy.posXX+=ballMy.speedX;
+            ballMy.posYY+=ballMy.speedY;
+            ballMy.posX+=ballMy.speedX;
+            ballMy.posY+=ballMy.speedY;
+        }else if(start&&statusGame===1){
+            ballMy.posXX+=ballMy.speedX;
+            ballMy.posYY+=ballMy.speedY;
+            ballMy.posX+=ballMy.speedX;
+            ballMy.posY+=ballMy.speedY;         
+        }else if(start&&statusGame===2){
+            statusGame=1;            
+            ballMy.posXX=ballCenterSX-ballRadius;
+            ballMy.posYY=ballCenterSY-ballRadius;
+            ballMy.posX=ballCenterSX;
+            ballMy.posY=ballCenterSY;
+            angel();            
+        }
+
+        // коснулся ли мяч правой ракетки?
+        if(ballMy.posX+ballMy.radius>=rightRasketMy.posX){
+            if(ballMy.posY>=rightRasketMy.posY&&ballMy.posY<=rightRasketMy.posY+rightRasketMy.height){
+                ballMy.speedX=-ballMy.speedX;
+            }else if(ballMy.posX+ballMy.radius>=wField&&statusGame===1){
+                statusGame=2;
+                start=false; 
+                ballMy.speedX=0;
+                ballMy.speedY=0;
+                leftCount++;
+                pCount.innerHTML=leftCount+' : '+rightCount;
+            }
+        }
+        // коснулся ли мяч левой ракетки?
+        if(ballMy.posX-ballMy.radius<=leftRasketMy.width){
+            if(ballMy.posY>=leftRasketMy.posY&&ballMy.posY<=leftRasketMy.posY+leftRasketMy.height){
+              ballMy.speedX=-ballMy.speedX;  
+            }else if(ballMy.posX-ballMy.radius<=0&&statusGame===1){
+              statusGame=2;
+              start=false; 
+              ballMy.speedX=0;
+              ballMy.speedY=0;
+              rightCount++;
+              pCount.innerHTML=leftCount+' : '+rightCount;
+            }
+        }
+         
+        // коснулся ли мяч верхней стороны?
+        if ((ballMy.posY-ballMy.radius<=0)) {          
+            ballMy.speedY=-ballMy.speedY;            
+        }else if ((ballMy.posY+ballMy.radius>=hField)) {         
+            ballMy.speedY=-ballMy.speedY;            
+        }
+        
+        //АНИМАЦИЯ РАКЕТОК
+        //левая
+        if(events[16]){
+            if ((leftRasketMy.posY>=0)) {
+             leftRasketMy.speedY=speedRasket;            
+             leftRasketMy.posY-=leftRasketMy.speedY;
+            }                                    
+        }
+        if(events[17]){
+            if ((leftRasketMy.posY+leftRasketMy.height<=hField)) {
+               leftRasketMy.speedY=speedRasket;           
+               leftRasketMy.posY+=leftRasketMy.speedY;
+            }                                      
+        }
+        //правая
+        if(events[38]){
+            if ((rightRasketMy.posY>=0)) {
+               rightRasketMy.speedY=speedRasket;                      
+               rightRasketMy.posYY-=rightRasketMy.speedY;
+               rightRasketMy.posY-=rightRasketMy.speedY;;
+            }                                        
+        }
+        if(events[40]){
+            if ((rightRasketMy.posY+rightRasketMy.height<hField)) {
+               rightRasketMy.speedY=speedRasket;          
+               rightRasketMy.posYY+=rightRasketMy.speedY;
+               rightRasketMy.posY+=rightRasketMy.speedY;;
+            }                                       
+        }
+        //при отпускании клавиши - ракетки останавливаются
+        if(!events[16]||!events[17]){                
+            leftRasketMy.speedY=0;                                                      
+        }
+
+        if(!events[38]||events[40]){
+            rightRasketMy.speedY=0;
+        }                                       
+        
+        //обновляем состояние мячика и ракеток                                       
+        ballMy.update();
+        leftRasketMy.update();
+        rightRasketMy.update();
+        RAF(move);        
+    }
+        
+    function init(EO){
+         EO=EO||window.event;
+         buttonStart.addEventListener('click',newStart);
+         document.addEventListener('keydown', keydown);
+         document.addEventListener('keyup', keyup);
+         RAF(move);
+
+        function newStart(EO){
+            EO=EO||window.event;
+            start=true;
+        } 
+
+         function keydown(EO){
+            EO=EO||window.event;
+            var w=EO.keyCode;
+            events[w] = true; // добавляем код кнопки в объект чтобы обеспечить одновременное движение обеих ракеток!
+        }
+
+        function keyup(EO) {
+            EO=EO||window.event;
+            var w=EO.keyCode;                                                     
+            events[w] = false;// удаляем код кнопки из объекта только когда клавиша отпущена
+            }
+    }
+    window.onload=init;
+    rightRasketMy.create();
+    leftRasketMy.create();
+    ballMy.create();
+	</script>
+</body>
+</html>
